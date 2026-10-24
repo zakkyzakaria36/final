@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Generate PWA Icons</title>
+</head>
+<body>
+    <canvas id="canvas192" width="192" height="192" style="display:none;"></canvas>
+    <canvas id="canvas512" width="512" height="512" style="display:none;"></canvas>
+    
+    <script>
+        // Generate 192x192 icon
+        const canvas192 = document.getElementById('canvas192');
+        const ctx192 = canvas192.getContext('2d');
+        
+        // Background gradient
+        const gradient192 = ctx192.createLinearGradient(0, 0, 192, 192);
+        gradient192.addColorStop(0, '#0ea5e9');
+        gradient192.addColorStop(0.5, '#2563eb');
+        gradient192.addColorStop(1, '#1e40af');
+        ctx192.fillStyle = gradient192;
+        ctx192.fillRect(0, 0, 192, 192);
+        
+        // Text "ZX"
+        ctx192.fillStyle = 'white';
+        ctx192.font = 'bold 96px Arial';
+        ctx192.textAlign = 'center';
+        ctx192.textBaseline = 'middle';
+        ctx192.fillText('ZX', 96, 96);
+        
+        // Download 192
+        canvas192.toBlob((blob) => {
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'icon-192.png';
+            a.click();
+        });
+        
+        // Generate 512x512 icon
+        const canvas512 = document.getElementById('canvas512');
+        const ctx512 = canvas512.getContext('2d');
+        
+        // Background gradient
+        const gradient512 = ctx512.createLinearGradient(0, 0, 512, 512);
+        gradient512.addColorStop(0, '#0ea5e9');
+        gradient512.addColorStop(0.5, '#2563eb');
+        gradient512.addColorStop(1, '#1e40af');
+        ctx512.fillStyle = gradient512;
+        ctx512.fillRect(0, 0, 512, 512);
+        
+        // Text "ZX"
+        ctx512.fillStyle = 'white';
+        ctx512.font = 'bold 256px Arial';
+        ctx512.textAlign = 'center';
+        ctx512.textBaseline = 'middle';
+        ctx512.fillText('ZX', 256, 256);
+        
+        // Download 512
+        setTimeout(() => {
+            canvas512.toBlob((blob) => {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'icon-512.png';
+                a.click();
+            });
+        }, 1000);
+        
+        document.body.innerHTML = '<h1>Icons downloaded! Check your downloads folder.</h1>';
+    </script>
+</body>
+</html>

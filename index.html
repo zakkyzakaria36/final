@@ -1,0 +1,2701 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZX Live Detection Pro</title>
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#2563eb">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="ZX Detect">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: linear-gradient(135deg, #0ea5e9 0%, #2563eb 50%, #1e40af 100%);
+            color: #1e293b;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        .watermark {
+            position: fixed;
+            bottom: 20px;
+            right: 30px;
+            font-size: 42px;
+            font-weight: 900;
+            color: rgba(255,255,255,0.15);
+            z-index: 1000;
+            pointer-events: none;
+            letter-spacing: -2px;
+        }
+        
+        .app-container {
+            max-width: 1600px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 0;
+            min-height: 100vh;
+        }
+        
+        @media (max-width: 768px) {
+            .app-container {
+                grid-template-columns: 1fr;
+                padding-bottom: 80px;
+            }
+        }
+        
+        /* SIDEBAR NAVIGATION */
+        .sidebar {
+            background: white;
+            box-shadow: 4px 0 20px rgba(0,0,0,0.1);
+            padding: 30px 20px;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                display: none;
+            }
+        }
+        
+        .logo-section {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        
+        .logo-text {
+            font-size: 28px;
+            font-weight: 900;
+            color: #2563eb;
+            letter-spacing: -1px;
+        }
+        
+        .logo-subtext {
+            font-size: 11px;
+            color: #64748b;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 5px;
+        }
+        
+        .user-profile {
+            background: #f8fafc;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .user-avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #2563eb, #0ea5e9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 18px;
+        }
+        
+        .user-info {
+            flex: 1;
+            overflow: hidden;
+        }
+        
+        .user-name {
+            font-weight: 700;
+            font-size: 14px;
+            color: #1e293b;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .user-email {
+            font-size: 11px;
+            color: #64748b;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .login-btn {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #2563eb, #0ea5e9);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .login-btn:hover {
+            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4);
+        }
+        
+        .logout-btn {
+            background: #f1f5f9;
+            color: #64748b;
+            font-size: 12px;
+            padding: 8px 12px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        
+        .nav-menu {
+            list-style: none;
+        }
+        
+        .nav-item {
+            margin-bottom: 10px;
+        }
+        
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px 20px;
+            border-radius: 12px;
+            color: #64748b;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 15px;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        
+        .nav-link:hover {
+            background: #f1f5f9;
+            color: #2563eb;
+        }
+        
+        .nav-link.active {
+            background: linear-gradient(135deg, #2563eb, #0ea5e9);
+            color: white;
+            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
+        }
+        
+        .nav-icon {
+            font-size: 22px;
+        }
+        
+        /* MAIN CONTENT */
+        .main-content {
+            background: rgba(255,255,255,0.95);
+            overflow-y: auto;
+        }
+        
+        .content-section {
+            display: none;
+            padding: 30px;
+            animation: fadeIn 0.4s;
+        }
+        
+        .content-section.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* HEADER */
+        .header {
+            background: white;
+            padding: 25px 30px;
+            border-radius: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        
+        .header-title {
+            font-size: 28px;
+            font-weight: 800;
+            color: #1e293b;
+        }
+        
+        .status-badge {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 14px;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+        }
+        
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            background: white;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(1.2); }
+        }
+        
+        .counter-display {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            background: #f1f5f9;
+            padding: 15px 25px;
+            border-radius: 50px;
+            font-weight: 700;
+            color: #2563eb;
+            font-size: 18px;
+        }
+        
+        /* DASHBOARD GRID */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            border-left: 5px solid #2563eb;
+        }
+        
+        .stat-label {
+            font-size: 13px;
+            color: #64748b;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 10px;
+        }
+        
+        .stat-value {
+            font-size: 36px;
+            font-weight: 800;
+            color: #2563eb;
+        }
+        
+        .stat-icon {
+            font-size: 40px;
+            opacity: 0.2;
+            float: right;
+        }
+        
+        /* SCAN MODE */
+        .scan-container {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 20px;
+            min-height: calc(100vh - 200px);
+        }
+        
+        @media (max-width: 1024px) {
+            .scan-container {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .viewfinder-area {
+            background: #000;
+            border-radius: 20px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .viewfinder-area.portrait #video {
+            width: auto;
+            height: 100%;
+            max-height: 80vh;
+        }
+        
+        .viewfinder-area.landscape #video {
+            width: 100%;
+            height: auto;
+            max-width: 100%;
+        }
+        
+        #video {
+            object-fit: contain;
+            display: none;
+        }
+        
+        #overlayCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            display: none;
+        }
+        
+        .video-info-overlay {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(10px);
+            padding: 15px 20px;
+            border-radius: 12px;
+            color: white;
+            font-weight: 600;
+            font-size: 13px;
+            z-index: 10;
+            display: none;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .counter-overlay {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(10px);
+            padding: 15px 20px;
+            border-radius: 12px;
+            color: white;
+            font-weight: 700;
+            font-size: 16px;
+            z-index: 10;
+            display: none;
+        }
+        
+        .counter-item {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+            margin-bottom: 8px;
+        }
+        
+        .counter-item:last-child {
+            margin-bottom: 0;
+            padding-top: 8px;
+            border-top: 2px solid rgba(255,255,255,0.3);
+        }
+        
+        .counter-label {
+            color: #fbbf24;
+        }
+        
+        .counter-value {
+            color: #10b981;
+            font-size: 18px;
+        }
+        
+        #canvas {
+            display: none;
+        }
+        
+        .control-panel {
+            background: white;
+            padding: 25px;
+            border-radius: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .input-group {
+            margin-bottom: 0;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-size: 13px;
+            color: #475569;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        select, input[type="text"], input[type="file"] {
+            width: 100%;
+            padding: 14px 18px;
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 15px;
+            color: #1e293b;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        select:focus, input:focus {
+            outline: none;
+            border-color: #2563eb;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+        }
+        
+        .fab-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .fab {
+            width: 100%;
+            padding: 18px;
+            border: none;
+            border-radius: 16px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+        }
+        
+        .fab:active {
+            transform: scale(0.95);
+        }
+        
+        .fab-green {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+        }
+        
+        .fab-green:hover {
+            box-shadow: 0 6px 25px rgba(16, 185, 129, 0.4);
+        }
+        
+        .fab-blue {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+        }
+        
+        .fab-red {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+        }
+        
+        .fab-yellow {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: white;
+        }
+        
+        .fab:disabled {
+            background: #cbd5e0;
+            color: #94a3b8;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+        
+        .orientation-toggle {
+            display: flex;
+            gap: 10px;
+            background: #f8fafc;
+            padding: 8px;
+            border-radius: 12px;
+        }
+        
+        .orientation-btn {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            background: white;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: #64748b;
+        }
+        
+        .orientation-btn.active {
+            background: linear-gradient(135deg, #2563eb, #0ea5e9);
+            color: white;
+            border-color: transparent;
+        }
+        
+        /* IMPORT SECTION */
+        .import-container {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            margin-bottom: 20px;
+        }
+        
+        .import-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 20px;
+        }
+        
+        .file-upload-area {
+            border: 3px dashed #e2e8f0;
+            border-radius: 16px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: #f8fafc;
+        }
+        
+        .file-upload-area:hover {
+            border-color: #2563eb;
+            background: #eff6ff;
+        }
+        
+        .file-upload-icon {
+            font-size: 64px;
+            margin-bottom: 15px;
+        }
+        
+        .file-upload-text {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 8px;
+        }
+        
+        .file-upload-hint {
+            font-size: 13px;
+            color: #64748b;
+        }
+        
+        .preview-container {
+            margin-top: 20px;
+            display: none;
+        }
+        
+        .preview-media {
+            width: 100%;
+            max-height: 500px;
+            object-fit: contain;
+            border-radius: 16px;
+            background: #000;
+        }
+        
+        .analysis-result {
+            background: #f8fafc;
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 20px;
+            display: none;
+        }
+        
+        .result-title {
+            font-weight: 700;
+            color: #1e293b;
+            font-size: 16px;
+            margin-bottom: 15px;
+        }
+        
+        .result-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+        }
+        
+        .result-item {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            border-left: 4px solid #2563eb;
+        }
+        
+        .result-label {
+            font-size: 12px;
+            color: #64748b;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .result-value {
+            font-size: 28px;
+            font-weight: 800;
+            color: #2563eb;
+        }
+        
+        /* HISTORY */
+        .history-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        
+        .history-card {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            transition: all 0.3s;
+            position: relative;
+        }
+        
+        .history-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 30px rgba(37, 99, 235, 0.2);
+        }
+        
+        .history-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+        
+        .history-content {
+            padding: 20px;
+        }
+        
+        .history-title {
+            font-weight: 700;
+            color: #1e293b;
+            font-size: 16px;
+            margin-bottom: 8px;
+        }
+        
+        .history-meta {
+            font-size: 13px;
+            color: #64748b;
+            margin-bottom: 12px;
+        }
+        
+        .history-detected {
+            background: #dbeafe;
+            color: #2563eb;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            display: inline-block;
+        }
+        
+        .delete-card {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(239, 68, 68, 0.95);
+            backdrop-filter: blur(10px);
+            border: none;
+            color: white;
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+            z-index: 10;
+        }
+        
+        .delete-card:hover {
+            background: #dc2626;
+            transform: scale(1.1);
+        }
+        
+        /* ANALYTICS */
+        .analytics-section {
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            margin-bottom: 20px;
+        }
+        
+        .analytics-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 20px;
+        }
+        
+        .frequency-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .frequency-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            background: #f8fafc;
+            padding: 15px;
+            border-radius: 12px;
+            border-left: 4px solid #2563eb;
+        }
+        
+        .frequency-icon {
+            font-size: 32px;
+        }
+        
+        .frequency-info {
+            flex: 1;
+        }
+        
+        .frequency-name {
+            font-weight: 700;
+            color: #1e293b;
+            font-size: 15px;
+            margin-bottom: 4px;
+        }
+        
+        .frequency-bar {
+            background: #e2e8f0;
+            height: 8px;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 8px;
+        }
+        
+        .frequency-fill {
+            background: linear-gradient(90deg, #2563eb, #0ea5e9);
+            height: 100%;
+            border-radius: 10px;
+            transition: width 0.5s;
+        }
+        
+        .frequency-count {
+            font-size: 24px;
+            font-weight: 800;
+            color: #2563eb;
+        }
+        
+        /* BOTTOM NAV MOBILE */
+        .bottom-nav {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.1);
+            padding: 12px 0;
+            z-index: 1000;
+        }
+        
+        @media (max-width: 768px) {
+            .bottom-nav {
+                display: flex;
+                justify-content: space-around;
+            }
+        }
+        
+        .bottom-nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            padding: 8px 15px;
+            cursor: pointer;
+            color: #94a3b8;
+            transition: all 0.3s;
+            text-decoration: none;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        
+        .bottom-nav-item.active {
+            color: #2563eb;
+        }
+        
+        .bottom-nav-icon {
+            font-size: 24px;
+        }
+        
+        /* ALERT */
+        .alert {
+            padding: 16px 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            font-weight: 600;
+            animation: slideDown 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .alert-info {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+        
+        .alert-success {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .timer-large {
+            font-size: 42px;
+            font-weight: 900;
+            color: #2563eb;
+            text-align: center;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 18px;
+            height: 18px;
+            border: 3px solid rgba(37, 99, 235, 0.3);
+            border-radius: 50%;
+            border-top-color: #2563eb;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #94a3b8;
+        }
+        
+        .empty-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+            opacity: 0.3;
+        }
+        
+        .empty-text {
+            font-size: 16px;
+            font-weight: 600;
+        }
+        
+        .tracking-info {
+            background: #dbeafe;
+            padding: 15px;
+            border-radius: 12px;
+            margin-top: 15px;
+            font-size: 13px;
+            color: #1e40af;
+            font-weight: 600;
+        }
+        
+        .live-feed-container {
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        
+        .feed-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .feed-item {
+            background: #f8fafc;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            border-left: 4px solid #2563eb;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            animation: slideIn 0.3s;
+        }
+        
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        
+        .feed-info {
+            flex: 1;
+        }
+        
+        .feed-object {
+            font-weight: 700;
+            color: #1e293b;
+            font-size: 15px;
+            margin-bottom: 5px;
+        }
+        
+        .feed-time {
+            font-size: 12px;
+            color: #64748b;
+        }
+        
+        .feed-badge {
+            background: #10b981;
+            color: white;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body>
+    <div class="watermark">zx</div>
+    
+    <div class="app-container">
+        <!-- SIDEBAR DESKTOP -->
+        <aside class="sidebar">
+            <div class="logo-section">
+                <div class="logo-text">ZX</div>
+                <div class="logo-subtext">Detection Pro</div>
+            </div>
+            
+            <!-- User Profile / Login -->
+            <div id="loginSection">
+                <button class="login-btn" id="googleLoginBtn">
+                    <span>🔐</span>
+                    <span>Login dengan Google</span>
+                </button>
+            </div>
+            
+            <div id="profileSection" class="hidden">
+                <div class="user-profile">
+                    <div class="user-avatar" id="userAvatar">?</div>
+                    <div class="user-info">
+                        <div class="user-name" id="userName">User</div>
+                        <div class="user-email" id="userEmail">email@gmail.com</div>
+                    </div>
+                </div>
+                <button class="logout-btn" id="logoutBtn">Keluar</button>
+            </div>
+            
+            <nav style="margin-top: 20px;">
+                <ul class="nav-menu">
+                    <li class="nav-item">
+                        <a class="nav-link active" data-section="dashboard">
+                            <span class="nav-icon">📊</span>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" data-section="scan">
+                            <span class="nav-icon">🎥</span>
+                            <span>Mode Deteksi</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" data-section="import">
+                            <span class="nav-icon">📂</span>
+                            <span>Import Media</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" data-section="analytics">
+                            <span class="nav-icon">📈</span>
+                            <span>Analisis Objek</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" data-section="history">
+                            <span class="nav-icon">📸</span>
+                            <span>Riwayat Data</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" data-section="settings">
+                            <span class="nav-icon">⚙️</span>
+                            <span>Pengaturan</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+        
+        <!-- MAIN CONTENT -->
+        <main class="main-content">
+            <div id="alertBox" class="alert alert-info hidden"></div>
+            
+            <!-- DASHBOARD SECTION -->
+            <section class="content-section active" id="dashboard">
+                <div class="header">
+                    <div>
+                        <h1 class="header-title">Dashboard Live</h1>
+                    </div>
+                    <div style="display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
+                        <div class="status-badge">
+                            <span class="status-dot"></span>
+                            <span id="statusText">SIAP</span>
+                        </div>
+                        <div class="counter-display">
+                            <span>Total:</span>
+                            <span id="dashboardCount">0</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="dashboard-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">🚗</div>
+                        <div class="stat-label">Mobil</div>
+                        <div class="stat-value" id="carCount">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">🏍️</div>
+                        <div class="stat-label">Motor</div>
+                        <div class="stat-value" id="motorcycleCount">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">👤</div>
+                        <div class="stat-label">Orang</div>
+                        <div class="stat-value" id="personCount">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">🚲</div>
+                        <div class="stat-label">Sepeda</div>
+                        <div class="stat-value" id="bicycleCount">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">🚌</div>
+                        <div class="stat-label">Bus</div>
+                        <div class="stat-value" id="busCount">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">🚚</div>
+                        <div class="stat-label">Truk</div>
+                        <div class="stat-value" id="truckCount">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">📸</div>
+                        <div class="stat-label">Foto Tersimpan</div>
+                        <div class="stat-value" id="photoCountDash">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">⏱️</div>
+                        <div class="stat-label">Durasi</div>
+                        <div class="stat-value" id="durationDash" style="font-size: 20px;">00:00</div>
+                    </div>
+                </div>
+                
+                <div class="live-feed-container">
+                    <div class="feed-title">
+                        <span>🔴</span>
+                        <span>Live Feed Deteksi</span>
+                    </div>
+                    <div id="liveFeed">
+                        <div class="empty-state">
+                            <div class="empty-icon">📡</div>
+                            <div class="empty-text">Menunggu deteksi aktif...</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- SCAN MODE SECTION -->
+            <section class="content-section" id="scan">
+                <div class="header">
+                    <h1 class="header-title">Mode Deteksi Live</h1>
+                </div>
+                
+                <div class="scan-container">
+                    <div class="viewfinder-area portrait" id="viewfinderArea">
+                        <video id="video" autoplay playsinline></video>
+                        <canvas id="overlayCanvas"></canvas>
+                        
+                        <div class="video-info-overlay" id="videoInfoOverlay">
+                            <div id="timestampDisplay"></div>
+                            <div id="locationDisplay"></div>
+                        </div>
+                        
+                        <div class="counter-overlay" id="counterOverlay">
+                            <div class="counter-item">
+                                <span class="counter-label">Mobil:</span>
+                                <span class="counter-value" id="liveCarCount">0</span>
+                            </div>
+                            <div class="counter-item">
+                                <span class="counter-label">Motor:</span>
+                                <span class="counter-value" id="liveMotorCount">0</span>
+                            </div>
+                            <div class="counter-item">
+                                <span class="counter-label">Orang:</span>
+                                <span class="counter-value" id="livePersonCount">0</span>
+                            </div>
+                            <div class="counter-item">
+                                <span class="counter-label">Total:</span>
+                                <span class="counter-value" id="liveTotalCount">0</span>
+                            </div>
+                        </div>
+                        
+                        <canvas id="canvas"></canvas>
+                    </div>
+                    
+                    <div class="control-panel">
+                        <div class="input-group">
+                            <label>📐 Orientasi Kamera</label>
+                            <div class="orientation-toggle">
+                                <button class="orientation-btn" data-orientation="portrait">📱 Potret</button>
+                                <button class="orientation-btn active" data-orientation="landscape">🖼️ Landscape</button>
+                            </div>
+                        </div>
+                        
+                        <div class="input-group">
+                            <label>🎯 Target Objek</label>
+                            <select id="targetObject">
+                                <option value="all">🌐 Semua Objek</option>
+                                <option value="car">🚗 Mobil (Car)</option>
+                                <option value="motorcycle">🏍️ Motor (Motorcycle)</option>
+                                <option value="person">👤 Orang (Person)</option>
+                                <option value="bicycle">🚲 Sepeda (Bicycle)</option>
+                                <option value="bus">🚌 Bus</option>
+                                <option value="truck">🚚 Truk (Truck)</option>
+                            </select>
+                        </div>
+                        
+                        <div class="input-group">
+                            <label>📍 Lokasi / Keterangan</label>
+                            <input type="text" id="locationInput" placeholder="Contoh: Jl. Sudirman, Jakarta">
+                        </div>
+                        
+                        <div class="timer-large" id="timerDisplay">00:00:00</div>
+                        
+                        <div class="tracking-info">
+                            <strong>🎯 Tracking IoU Aktif</strong><br>
+                            Multi-objek dengan bounding box real-time di video
+                        </div>
+                        
+                        <div class="fab-container">
+                            <button class="fab fab-green" id="startBtn">▶ Mulai Deteksi</button>
+                            <button class="fab fab-blue hidden" id="captureBtn">📸 Ambil Foto</button>
+                            <button class="fab fab-red hidden" id="stopBtn">⏹ Stop Tracking</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- IMPORT SECTION -->
+            <section class="content-section" id="import">
+                <div class="header">
+                    <h1 class="header-title">Import Foto/Video</h1>
+                </div>
+                
+                <div class="import-container">
+                    <div class="import-title">📂 Upload Media untuk Analisis</div>
+                    
+                    <div class="file-upload-area" id="fileUploadArea">
+                        <div class="file-upload-icon">📁</div>
+                        <div class="file-upload-text">Klik atau Drag & Drop File</div>
+                        <div class="file-upload-hint">Mendukung: JPG, PNG, MP4, WebM (Max 100MB)</div>
+                        <input type="file" id="fileInput" accept="image/*,video/*" style="display: none;">
+                    </div>
+                    
+                    <div class="preview-container" id="previewContainer">
+                        <img id="previewImage" class="preview-media" style="display: none;">
+                        <video id="previewVideo" class="preview-media" controls style="display: none;"></video>
+                        <canvas id="importCanvas" style="display: none;"></canvas>
+                        
+                        <div style="margin-top: 20px; display: flex; gap: 15px;">
+                            <button class="fab fab-green" id="analyzeBtn" style="flex: 1;">🔍 Analisis Sekarang</button>
+                            <button class="fab fab-yellow" id="clearImportBtn" style="flex: 1;">🔄 Upload Baru</button>
+                        </div>
+                    </div>
+                    
+                    <div class="analysis-result" id="analysisResult">
+                        <div class="result-title">📊 Hasil Analisis</div>
+                        <div class="result-grid" id="resultGrid"></div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- ANALYTICS SECTION -->
+            <section class="content-section" id="analytics">
+                <div class="header">
+                    <h1 class="header-title">Analisis Frekuensi Objek</h1>
+                </div>
+                
+                <div class="analytics-section">
+                    <div class="analytics-title">📊 Objek yang Sering Dijumpai</div>
+                    <div class="frequency-list" id="frequencyList">
+                        <div class="empty-state">
+                            <div class="empty-icon">📈</div>
+                            <div class="empty-text">Belum ada data analisis. Mulai tracking atau import media.</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="analytics-section">
+                    <div class="analytics-title">🏆 Top 10 Objek Terdeteksi</div>
+                    <div id="topObjectsList">
+                        <div class="empty-state">
+                            <div class="empty-icon">🎯</div>
+                            <div class="empty-text">Data akan muncul setelah tracking/import</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- HISTORY SECTION -->
+            <section class="content-section" id="history">
+                <div class="header">
+                    <h1 class="header-title">Riwayat Data (<span id="photoCountHistory">0</span>)</h1>
+                    <div style="display: flex; gap: 10px;">
+                        <button class="fab fab-yellow" id="saveToDriveBtn" disabled>☁️ Simpan ke Drive</button>
+                        <button class="fab fab-blue" id="exportBtn" disabled>💾 Ekspor ZIP</button>
+                    </div>
+                </div>
+                
+                <div class="history-grid" id="historyGrid">
+                    <div class="empty-state">
+                        <div class="empty-icon">📁</div>
+                        <div class="empty-text">Belum ada data tersimpan</div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- SETTINGS SECTION -->
+            <section class="content-section" id="settings">
+                <div class="header">
+                    <h1 class="header-title">Pengaturan Aplikasi</h1>
+                </div>
+                
+                <div class="control-panel">
+                    <div class="input-group">
+                        <label>🎚️ IoU Threshold (Sensitivitas)</label>
+                        <select id="iouThreshold">
+                            <option value="0.3">Rendah (0.3) - Lebih ketat</option>
+                            <option value="0.5" selected>Sedang (0.5) - Seimbang</option>
+                            <option value="0.7">Tinggi (0.7) - Lebih longgar</option>
+                        </select>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label>⏱️ Timeout Tracking</label>
+                        <select id="trackingTimeout">
+                            <option value="2000">2 detik</option>
+                            <option value="3000" selected>3 detik</option>
+                            <option value="5000">5 detik</option>
+                        </select>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label>🔄 Reset Data</label>
+                        <button class="fab fab-red" id="resetAllBtn">Hapus Semua Riwayat & Analisis</button>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label>ℹ️ Informasi</label>
+                        <div style="background: #f8fafc; padding: 20px; border-radius: 12px; font-size: 14px; color: #475569;">
+                            <strong>ZX Live Detection Pro</strong><br>
+                            Versi 3.0 - Multi-Object Edition<br>
+                            Fitur: IoU Tracking, Import Media, Google Drive<br>
+                            Powered by TensorFlow.js COCO-SSD<br>
+                            © 2026 ZX Technology
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+        
+        <!-- BOTTOM NAVIGATION MOBILE -->
+        <nav class="bottom-nav">
+            <a class="bottom-nav-item active" data-section="dashboard">
+                <span class="bottom-nav-icon">📊</span>
+                <span>Dashboard</span>
+            </a>
+            <a class="bottom-nav-item" data-section="scan">
+                <span class="bottom-nav-icon">🎥</span>
+                <span>Deteksi</span>
+            </a>
+            <a class="bottom-nav-item" data-section="import">
+                <span class="bottom-nav-icon">📂</span>
+                <span>Import</span>
+            </a>
+            <a class="bottom-nav-item" data-section="analytics">
+                <span class="bottom-nav-icon">📈</span>
+                <span>Analisis</span>
+            </a>
+            <a class="bottom-nav-item" data-section="history">
+                <span class="bottom-nav-icon">📸</span>
+                <span>Riwayat</span>
+            </a>
+        </nav>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.11.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd@2.2.3"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    
+    <!-- Firebase SDK v9+ Modular -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, query, where, orderBy, limit } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+        import { getAnalytics } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics.js';
+        
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyC_8uIMO87LAQe0mOQAm9Wo6itU_kJz8BA",
+            authDomain: "zx-ai-detect.firebaseapp.com",
+            projectId: "zx-ai-detect",
+            storageBucket: "zx-ai-detect.firebasestorage.app",
+            messagingSenderId: "616320389176",
+            appId: "1:616320389176:web:294d713c29e2f46527d6cd",
+            measurementId: "G-ET317EKHRQ"
+        };
+        
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const analytics = getAnalytics(app);
+        const provider = new GoogleAuthProvider();
+        
+        // Add Drive scope for Google Drive API access
+        provider.addScope('https://www.googleapis.com/auth/drive.file');
+        
+        // Export ke window untuk akses global
+        window.firebaseAuth = auth;
+        window.firebaseDb = db;
+        window.firebaseProvider = provider;
+        window.firebaseModules = { signInWithPopup, signOut, onAuthStateChanged, collection, addDoc, getDocs, deleteDoc, doc, query, where, orderBy, limit };
+    </script>
+    
+    <!-- Google API Client for Drive -->
+    <script src="https://apis.google.com/js/api.js"></script>
+    
+    <script>
+        // GLOBAL STATE
+        let stream = null;
+        let model = null;
+        let detectionInterval = null;
+        let isTracking = false;
+        let orientation = 'portrait';
+        
+        let totalCounts = {
+            car: 0,
+            motorcycle: 0,
+            person: 0,
+            bicycle: 0,
+            bus: 0,
+            truck: 0,
+            total: 0
+        };
+        
+        let trackedObjects = new Map();
+        let objectFrequency = {};
+        let dataCollected = [];
+        
+        let startTime = null;
+        let timerInterval = null;
+        
+        let iouThreshold = 0.5;
+        let trackingTimeout = 3000;
+        
+        let currentUser = null;
+        
+        // DOM ELEMENTS
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const overlayCanvas = document.getElementById('overlayCanvas');
+        const overlayCtx = overlayCanvas.getContext('2d');
+        
+        const startBtn = document.getElementById('startBtn');
+        const captureBtn = document.getElementById('captureBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const exportBtn = document.getElementById('exportBtn');
+        const resetAllBtn = document.getElementById('resetAllBtn');
+        const saveToDriveBtn = document.getElementById('saveToDriveBtn');
+        
+        const targetSelect = document.getElementById('targetObject');
+        const locationInput = document.getElementById('locationInput');
+        const iouThresholdSelect = document.getElementById('iouThreshold');
+        const trackingTimeoutSelect = document.getElementById('trackingTimeout');
+        const alertBox = document.getElementById('alertBox');
+        
+        const timerDisplay = document.getElementById('timerDisplay');
+        const videoInfoOverlay = document.getElementById('videoInfoOverlay');
+        const counterOverlay = document.getElementById('counterOverlay');
+        const timestampDisplay = document.getElementById('timestampDisplay');
+        const locationDisplay = document.getElementById('locationDisplay');
+        const liveFeed = document.getElementById('liveFeed');
+        const historyGrid = document.getElementById('historyGrid');
+        const frequencyList = document.getElementById('frequencyList');
+        const topObjectsList = document.getElementById('topObjectsList');
+        const viewfinderArea = document.getElementById('viewfinderArea');
+        
+        // Import elements
+        const fileUploadArea = document.getElementById('fileUploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const previewContainer = document.getElementById('previewContainer');
+        const previewImage = document.getElementById('previewImage');
+        const previewVideo = document.getElementById('previewVideo');
+        const importCanvas = document.getElementById('importCanvas');
+        const analyzeBtn = document.getElementById('analyzeBtn');
+        const clearImportBtn = document.getElementById('clearImportBtn');
+        const analysisResult = document.getElementById('analysisResult');
+        const resultGrid = document.getElementById('resultGrid');
+        
+        // Google Login elements
+        const googleLoginBtn = document.getElementById('googleLoginBtn');
+        const loginSection = document.getElementById('loginSection');
+        const profileSection = document.getElementById('profileSection');
+        const userAvatar = document.getElementById('userAvatar');
+        const userName = document.getElementById('userName');
+        const userEmail = document.getElementById('userEmail');
+        const logoutBtn = document.getElementById('logoutBtn');
+        
+        // LOAD AI MODEL
+        async function loadModel() {
+            showAlert('⏳ Memuat model AI...', 'info');
+            model = await cocoSsd.load();
+            showAlert('✅ Model AI siap! Multi-object tracking aktif', 'success');
+        }
+        
+        loadModel();
+        
+        // FIREBASE AUTH - GOOGLE LOGIN
+        googleLoginBtn.addEventListener('click', async () => {
+            try {
+                googleLoginBtn.disabled = true;
+                googleLoginBtn.innerHTML = '<span class="loading"></span> Connecting...';
+                
+                const { signInWithPopup } = window.firebaseModules;
+                const result = await signInWithPopup(window.firebaseAuth, window.firebaseProvider);
+                const user = result.user;
+                
+                // Store for Drive API access
+                window.lastSignInResult = result;
+                
+                // Get Drive access token if available
+                const credential = GoogleAuthProvider.credentialFromResult(result);
+                if (credential && credential.accessToken) {
+                    window.driveAccessToken = credential.accessToken;
+                }
+                
+                currentUser = {
+                    uid: user.uid,
+                    name: user.displayName,
+                    email: user.email,
+                    avatar: user.displayName.charAt(0).toUpperCase(),
+                    photoURL: user.photoURL
+                };
+                
+                loginSection.classList.add('hidden');
+                profileSection.classList.remove('hidden');
+                
+                if (currentUser.photoURL) {
+                    userAvatar.innerHTML = `<img src="${currentUser.photoURL}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">`;
+                } else {
+                    userAvatar.textContent = currentUser.avatar;
+                }
+                userName.textContent = currentUser.name;
+                userEmail.textContent = currentUser.email;
+                
+                saveToDriveBtn.disabled = false;
+                
+                // Load user data from Firestore
+                await loadUserDataFromFirestore();
+                
+                showAlert('✅ Login berhasil! Data bisa disimpan ke Drive', 'success');
+                
+                googleLoginBtn.disabled = false;
+                googleLoginBtn.innerHTML = '<span>🔐</span><span>Login dengan Google</span>';
+            } catch (error) {
+                console.error('Login error:', error);
+                showAlert('❌ Login gagal: ' + error.message, 'info');
+                googleLoginBtn.disabled = false;
+                googleLoginBtn.innerHTML = '<span>🔐</span><span>Login dengan Google</span>';
+            }
+        });
+        
+        logoutBtn.addEventListener('click', async () => {
+            try {
+                const { signOut } = window.firebaseModules;
+                await signOut(window.firebaseAuth);
+                
+                currentUser = null;
+                profileSection.classList.add('hidden');
+                loginSection.classList.remove('hidden');
+                saveToDriveBtn.disabled = true;
+                
+                showAlert('👋 Logout berhasil', 'info');
+            } catch (error) {
+                console.error('Logout error:', error);
+                showAlert('❌ Logout gagal', 'info');
+            }
+        });
+        
+        // AUTH STATE LISTENER
+        window.addEventListener('load', () => {
+            const { onAuthStateChanged } = window.firebaseModules;
+            onAuthStateChanged(window.firebaseAuth, (user) => {
+                if (user) {
+                    currentUser = {
+                        uid: user.uid,
+                        name: user.displayName,
+                        email: user.email,
+                        avatar: user.displayName.charAt(0).toUpperCase(),
+                        photoURL: user.photoURL
+                    };
+                    
+                    loginSection.classList.add('hidden');
+                    profileSection.classList.remove('hidden');
+                    
+                    if (currentUser.photoURL) {
+                        userAvatar.innerHTML = `<img src="${currentUser.photoURL}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">`;
+                    } else {
+                        userAvatar.textContent = currentUser.avatar;
+                    }
+                    userName.textContent = currentUser.name;
+                    userEmail.textContent = currentUser.email;
+                    
+                    saveToDriveBtn.disabled = false;
+                    
+                    loadUserDataFromFirestore();
+                } else {
+                    currentUser = null;
+                    loginSection.classList.remove('hidden');
+                    profileSection.classList.add('hidden');
+                    saveToDriveBtn.disabled = true;
+                }
+            });
+        });
+        
+        // NAVIGATION
+        document.querySelectorAll('.nav-link, .bottom-nav-item').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const section = link.dataset.section;
+                
+                document.querySelectorAll('.nav-link, .bottom-nav-item').forEach(l => l.classList.remove('active'));
+                document.querySelectorAll(`[data-section="${section}"]`).forEach(l => l.classList.add('active'));
+                
+                document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+                document.getElementById(section).classList.add('active');
+                
+                if (section === 'analytics') {
+                    updateAnalytics();
+                }
+            });
+        });
+        
+        // ORIENTATION TOGGLE
+        document.querySelectorAll('.orientation-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.orientation-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                orientation = btn.dataset.orientation;
+                viewfinderArea.className = `viewfinder-area ${orientation}`;
+                showAlert(`📐 Orientasi: ${orientation === 'portrait' ? 'Potret' : 'Landscape'}`, 'info');
+            });
+        });
+        
+        // SETTINGS
+        iouThresholdSelect.addEventListener('change', (e) => {
+            iouThreshold = parseFloat(e.target.value);
+            showAlert(`🎚️ IoU: ${iouThreshold}`, 'info');
+        });
+        
+        trackingTimeoutSelect.addEventListener('change', (e) => {
+            trackingTimeout = parseInt(e.target.value);
+            showAlert(`⏱️ Timeout: ${trackingTimeout/1000}s`, 'info');
+        });
+        
+        function showAlert(message, type = 'info') {
+            alertBox.innerHTML = `<span>${message}</span>`;
+            alertBox.className = `alert alert-${type}`;
+            alertBox.classList.remove('hidden');
+            setTimeout(() => alertBox.classList.add('hidden'), 3000);
+        }
+        
+        function startTimer() {
+            startTime = Date.now();
+            timerInterval = setInterval(updateTimer, 1000);
+        }
+        
+        function updateTimer() {
+            if (!startTime) return;
+            const elapsed = Date.now() - startTime;
+            const hours = Math.floor(elapsed / 3600000);
+            const minutes = Math.floor((elapsed % 3600000) / 60000);
+            const seconds = Math.floor((elapsed % 60000) / 1000);
+            
+            const timeStr = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            timerDisplay.textContent = timeStr;
+            document.getElementById('durationDash').textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        }
+        
+        function stopTimer() {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+        }
+        
+        function resetTimer() {
+            stopTimer();
+            startTime = null;
+            timerDisplay.textContent = '00:00:00';
+            document.getElementById('durationDash').textContent = '00:00';
+        }
+        
+        // IoU CALCULATION
+        function calculateIoU(boxA, boxB) {
+            const [x1A, y1A, wA, hA] = boxA;
+            const [x1B, y1B, wB, hB] = boxB;
+            
+            const x2A = x1A + wA;
+            const y2A = y1A + hA;
+            const x2B = x1B + wB;
+            const y2B = y1B + hB;
+            
+            const xLeft = Math.max(x1A, x1B);
+            const yTop = Math.max(y1A, y1B);
+            const xRight = Math.min(x2A, x2B);
+            const yBottom = Math.min(y2A, y2B);
+            
+            if (xRight < xLeft || yBottom < yTop) return 0;
+            
+            const intersectionArea = (xRight - xLeft) * (yBottom - yTop);
+            const boxAArea = wA * hA;
+            const boxBArea = wB * hB;
+            const unionArea = boxAArea + boxBArea - intersectionArea;
+            
+            return intersectionArea / unionArea;
+        }
+        
+        function findMatchingTrack(prediction) {
+            let bestMatch = null;
+            let bestIoU = 0;
+            
+            for (let [id, track] of trackedObjects.entries()) {
+                if (track.class !== prediction.class) continue;
+                
+                const iou = calculateIoU(prediction.bbox, track.bbox);
+                
+                if (iou > iouThreshold && iou > bestIoU) {
+                    bestIoU = iou;
+                    bestMatch = id;
+                }
+            }
+            
+            return bestMatch;
+        }
+        
+        function cleanupOldTracking() {
+            const now = Date.now();
+            
+            for (let [id, track] of trackedObjects.entries()) {
+                if (now - track.timestamp > trackingTimeout) {
+                    trackedObjects.delete(id);
+                }
+            }
+        }
+        
+        function updateCounters() {
+            document.getElementById('carCount').textContent = totalCounts.car;
+            document.getElementById('motorcycleCount').textContent = totalCounts.motorcycle;
+            document.getElementById('personCount').textContent = totalCounts.person;
+            document.getElementById('bicycleCount').textContent = totalCounts.bicycle;
+            document.getElementById('busCount').textContent = totalCounts.bus;
+            document.getElementById('truckCount').textContent = totalCounts.truck;
+            document.getElementById('dashboardCount').textContent = totalCounts.total;
+            
+            document.getElementById('liveCarCount').textContent = totalCounts.car;
+            document.getElementById('liveMotorCount').textContent = totalCounts.motorcycle;
+            document.getElementById('livePersonCount').textContent = totalCounts.person;
+            document.getElementById('liveTotalCount').textContent = totalCounts.total;
+        }
+        
+        function getObjectIcon(className) {
+            const icons = {
+                'person': '👤', 'car': '🚗', 'motorcycle': '🏍️', 'bicycle': '🚲',
+                'bus': '🚌', 'truck': '🚚', 'traffic light': '🚦', 'stop sign': '🛑',
+                'backpack': '🎒', 'umbrella': '☂️', 'handbag': '👜', 'tie': '👔',
+                'suitcase': '🧳', 'bottle': '🍾', 'wine glass': '🍷', 'cup': '☕',
+                'fork': '🍴', 'knife': '🔪', 'spoon': '🥄', 'bowl': '🥣',
+                'banana': '🍌', 'apple': '🍎', 'sandwich': '🥪', 'orange': '🍊',
+                'broccoli': '🥦', 'carrot': '🥕', 'hot dog': '🌭', 'pizza': '🍕',
+                'donut': '🍩', 'cake': '🍰', 'chair': '🪑', 'couch': '🛋️',
+                'potted plant': '🪴', 'bed': '🛏️', 'dining table': '🍽️', 'toilet': '🚽',
+                'tv': '📺', 'laptop': '💻', 'mouse': '🖱️', 'remote': '📱',
+                'keyboard': '⌨️', 'cell phone': '📱', 'book': '📚', 'clock': '🕐',
+                'vase': '🏺', 'scissors': '✂️', 'teddy bear': '🧸'
+            };
+            return icons[className] || '🎯';
+        }
+        
+        // DRAW BOUNDING BOXES
+        function drawBoundingBoxes(predictions) {
+            const videoRect = video.getBoundingClientRect();
+            const containerRect = viewfinderArea.getBoundingClientRect();
+            
+            overlayCanvas.width = video.videoWidth;
+            overlayCanvas.height = video.videoHeight;
+            
+            overlayCanvas.style.width = video.offsetWidth + 'px';
+            overlayCanvas.style.height = video.offsetHeight + 'px';
+            
+            const scaleX = video.videoWidth / video.offsetWidth;
+            const scaleY = video.videoHeight / video.offsetHeight;
+            
+            overlayCtx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
+            
+            predictions.forEach(pred => {
+                const [x, y, width, height] = pred.bbox;
+                const confidence = Math.round(pred.score * 100);
+                
+                // Warna berdasarkan kelas
+                let color = '#10b981'; // hijau default
+                if (pred.class === 'car') color = '#fbbf24'; // kuning
+                if (pred.class === 'motorcycle') color = '#10b981'; // hijau
+                if (pred.class === 'person') color = '#3b82f6'; // biru
+                
+                // Draw box
+                overlayCtx.strokeStyle = color;
+                overlayCtx.lineWidth = 4;
+                overlayCtx.strokeRect(x, y, width, height);
+                
+                // Draw label background
+                const label = `${pred.class} ${confidence}%`;
+                overlayCtx.font = 'bold 16px Arial';
+                const textWidth = overlayCtx.measureText(label).width;
+                
+                overlayCtx.fillStyle = color;
+                overlayCtx.fillRect(x, y - 30, textWidth + 20, 30);
+                
+                // Draw label text
+                overlayCtx.fillStyle = '#000';
+                overlayCtx.fillText(label, x + 10, y - 8);
+            });
+        }
+        
+        // START DETECTION
+        startBtn.addEventListener('click', async () => {
+            try {
+                const constraints = orientation === 'portrait' 
+                    ? { video: { facingMode: 'environment', width: { ideal: 1080 }, height: { ideal: 1920 } } }
+                    : { video: { facingMode: 'environment', width: { ideal: 1920 }, height: { ideal: 1080 } } };
+                
+                stream = await navigator.mediaDevices.getUserMedia(constraints);
+                
+                video.srcObject = stream;
+                video.style.display = 'block';
+                overlayCanvas.style.display = 'block';
+                videoInfoOverlay.style.display = 'block';
+                counterOverlay.style.display = 'block';
+                
+                startBtn.classList.add('hidden');
+                captureBtn.classList.remove('hidden');
+                stopBtn.classList.remove('hidden');
+                
+                document.getElementById('statusText').textContent = 'LIVE';
+                
+                isTracking = true;
+                startLiveDetection();
+                startTimer();
+                updateTimestampOverlay();
+                
+                showAlert('✅ Deteksi live dimulai!', 'success');
+            } catch (err) {
+                showAlert('❌ Gagal akses kamera: ' + err.message, 'info');
+            }
+        });
+        
+        function updateTimestampOverlay() {
+            if (!isTracking) return;
+            
+            const now = new Date();
+            const dateStr = now.toLocaleDateString('id-ID');
+            const timeStr = now.toLocaleTimeString('id-ID');
+            timestampDisplay.textContent = `${dateStr} ${timeStr}`;
+            
+            const loc = locationInput.value.trim() || 'Tidak disebutkan';
+            locationDisplay.textContent = `📍 ${loc}`;
+            
+            if (isTracking) {
+                setTimeout(updateTimestampOverlay, 1000);
+            }
+        }
+        
+        async function startLiveDetection() {
+            if (!model || !isTracking) return;
+            
+            detectionInterval = setInterval(async () => {
+                if (!isTracking) return;
+                
+                const predictions = await model.detect(video);
+                const target = targetSelect.value;
+                
+                let filtered = target === 'all' 
+                    ? predictions 
+                    : predictions.filter(p => p.class === target);
+                
+                cleanupOldTracking();
+                
+                filtered.forEach(pred => {
+                    const matchId = findMatchingTrack(pred);
+                    const now = Date.now();
+                    
+                    if (matchId) {
+                        trackedObjects.set(matchId, {
+                            bbox: pred.bbox,
+                            timestamp: now,
+                            class: pred.class
+                        });
+                    } else {
+                        const newId = `obj_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+                        trackedObjects.set(newId, {
+                            bbox: pred.bbox,
+                            timestamp: now,
+                            class: pred.class
+                        });
+                        
+                        // Update counters
+                        if (pred.class === 'car') totalCounts.car++;
+                        else if (pred.class === 'motorcycle') totalCounts.motorcycle++;
+                        else if (pred.class === 'person') totalCounts.person++;
+                        else if (pred.class === 'bicycle') totalCounts.bicycle++;
+                        else if (pred.class === 'bus') totalCounts.bus++;
+                        else if (pred.class === 'truck') totalCounts.truck++;
+                        
+                        totalCounts.total++;
+                        
+                        if (!objectFrequency[pred.class]) {
+                            objectFrequency[pred.class] = 0;
+                        }
+                        objectFrequency[pred.class]++;
+                        
+                        updateCounters();
+                        addLiveFeed(pred.class, Math.round(pred.score * 100));
+                    }
+                });
+                
+                drawBoundingBoxes(filtered);
+                
+            }, 500);
+        }
+        
+        function addLiveFeed(objectClass, confidence) {
+            if (liveFeed.querySelector('.empty-state')) {
+                liveFeed.innerHTML = '';
+            }
+            
+            const now = new Date().toLocaleTimeString('id-ID');
+            const item = document.createElement('div');
+            item.className = 'feed-item';
+            item.innerHTML = `
+                <div class="feed-info">
+                    <div class="feed-object">${getObjectIcon(objectClass)} ${objectClass}</div>
+                    <div class="feed-time">🕐 ${now}</div>
+                </div>
+                <div class="feed-badge">${confidence}%</div>
+            `;
+            
+            liveFeed.insertBefore(item, liveFeed.firstChild);
+            
+            if (liveFeed.children.length > 20) {
+                liveFeed.removeChild(liveFeed.lastChild);
+            }
+        }
+        
+        captureBtn.addEventListener('click', async () => {
+            captureBtn.disabled = true;
+            captureBtn.innerHTML = '<span class="loading"></span> Menyimpan...';
+            
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            ctx.drawImage(video, 0, 0);
+            
+            const imageData = canvas.toDataURL('image/jpeg', 0.9);
+            
+            let detectedObjects = [];
+            if (model) {
+                const predictions = await model.detect(video);
+                detectedObjects = predictions.map(p => `${p.class} (${Math.round(p.score * 100)}%)`);
+            }
+            
+            const location = locationInput.value.trim() || 'Tidak disebutkan';
+            const timestamp = new Date().toLocaleString('id-ID');
+            const filename = `capture_${dataCollected.length}_${Date.now()}.jpg`;
+            
+            const record = {
+                id: dataCollected.length,
+                filename,
+                timestamp,
+                location,
+                detected: detectedObjects.join(', ') || 'Tidak ada deteksi',
+                imageData,
+                counters: {...totalCounts},
+                duration: timerDisplay.textContent,
+                frequency: {...objectFrequency}
+            };
+            
+            dataCollected.push(record);
+            updateHistory();
+            saveToLocalStorage();
+            
+            // Save to Firestore if logged in
+            if (currentUser) {
+                await saveToFirestore(record);
+            }
+            
+            showAlert(`✅ Foto tersimpan! ${detectedObjects.length} objek`, 'success');
+            
+            captureBtn.disabled = false;
+            captureBtn.innerHTML = '📸 Ambil Foto';
+        });
+        
+        stopBtn.addEventListener('click', () => {
+            isTracking = false;
+            
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+                video.style.display = 'none';
+                overlayCanvas.style.display = 'none';
+                videoInfoOverlay.style.display = 'none';
+                counterOverlay.style.display = 'none';
+            }
+            
+            if (detectionInterval) {
+                clearInterval(detectionInterval);
+                detectionInterval = null;
+            }
+            
+            stopTimer();
+            
+            startBtn.classList.remove('hidden');
+            captureBtn.classList.add('hidden');
+            stopBtn.classList.add('hidden');
+            
+            document.getElementById('statusText').textContent = 'SIAP';
+            
+            showAlert('⏹ Tracking dihentikan', 'info');
+        });
+        
+        // IMPORT FEATURE
+        fileUploadArea.addEventListener('click', () => {
+            fileInput.click();
+        });
+        
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            const fileType = file.type.split('/')[0];
+            
+            if (fileType === 'image') {
+                previewImage.src = URL.createObjectURL(file);
+                previewImage.style.display = 'block';
+                previewVideo.style.display = 'none';
+                previewContainer.style.display = 'block';
+                analysisResult.style.display = 'none';
+            } else if (fileType === 'video') {
+                previewVideo.src = URL.createObjectURL(file);
+                previewVideo.style.display = 'block';
+                previewImage.style.display = 'none';
+                previewContainer.style.display = 'block';
+                analysisResult.style.display = 'none';
+            }
+        });
+        
+        analyzeBtn.addEventListener('click', async () => {
+            if (!model) {
+                showAlert('⏳ Model belum siap, tunggu sebentar...', 'info');
+                return;
+            }
+            
+            analyzeBtn.disabled = true;
+            analyzeBtn.innerHTML = '<span class="loading"></span> Menganalisis...';
+            
+            const isVideo = previewVideo.style.display === 'block';
+            
+            if (isVideo) {
+                await analyzeVideo();
+            } else {
+                await analyzeImage();
+            }
+            
+            analyzeBtn.disabled = false;
+            analyzeBtn.innerHTML = '🔍 Analisis Sekarang';
+        });
+        
+        async function analyzeImage() {
+            const predictions = await model.detect(previewImage);
+            
+            const counts = {};
+            predictions.forEach(p => {
+                counts[p.class] = (counts[p.class] || 0) + 1;
+            });
+            
+            displayAnalysisResult(counts, predictions.length);
+        }
+        
+        async function analyzeVideo() {
+            const video = previewVideo;
+            const duration = video.duration;
+            
+            showAlert('🎬 Menganalisis video... Tunggu hingga selesai', 'info');
+            
+            const counts = {};
+            const sampleRate = 2; // Analisis setiap 2 detik
+            
+            for (let t = 0; t < duration; t += sampleRate) {
+                video.currentTime = t;
+                await new Promise(resolve => {
+                    video.onseeked = resolve;
+                });
+                
+                const predictions = await model.detect(video);
+                predictions.forEach(p => {
+                    counts[p.class] = (counts[p.class] || 0) + 1;
+                });
+            }
+            
+            const total = Object.values(counts).reduce((a, b) => a + b, 0);
+            displayAnalysisResult(counts, total);
+            
+            showAlert('✅ Analisis video selesai!', 'success');
+        }
+        
+        function displayAnalysisResult(counts, total) {
+            resultGrid.innerHTML = '';
+            
+            const sortedCounts = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+            
+            sortedCounts.forEach(([className, count]) => {
+                const item = document.createElement('div');
+                item.className = 'result-item';
+                item.innerHTML = `
+                    <div class="result-label">${getObjectIcon(className)} ${className}</div>
+                    <div class="result-value">${count}</div>
+                `;
+                resultGrid.appendChild(item);
+            });
+            
+            const totalItem = document.createElement('div');
+            totalItem.className = 'result-item';
+            totalItem.style.borderLeftColor = '#10b981';
+            totalItem.innerHTML = `
+                <div class="result-label">🎯 TOTAL</div>
+                <div class="result-value">${total}</div>
+            `;
+            resultGrid.appendChild(totalItem);
+            
+            analysisResult.style.display = 'block';
+        }
+        
+        clearImportBtn.addEventListener('click', () => {
+            previewContainer.style.display = 'none';
+            analysisResult.style.display = 'none';
+            fileInput.value = '';
+            previewImage.src = '';
+            previewVideo.src = '';
+        });
+        
+        // ANALYTICS
+        function updateAnalytics() {
+            if (Object.keys(objectFrequency).length === 0) {
+                frequencyList.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">📈</div>
+                        <div class="empty-text">Belum ada data analisis</div>
+                    </div>
+                `;
+                topObjectsList.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">🎯</div>
+                        <div class="empty-text">Data akan muncul setelah tracking</div>
+                    </div>
+                `;
+                return;
+            }
+            
+            const sorted = Object.entries(objectFrequency).sort((a, b) => b[1] - a[1]);
+            const maxCount = sorted[0][1];
+            
+            frequencyList.innerHTML = '';
+            sorted.forEach(([className, count]) => {
+                const percentage = (count / maxCount) * 100;
+                const item = document.createElement('div');
+                item.className = 'frequency-item';
+                item.innerHTML = `
+                    <div class="frequency-icon">${getObjectIcon(className)}</div>
+                    <div class="frequency-info">
+                        <div class="frequency-name">${className}</div>
+                        <div class="frequency-bar">
+                            <div class="frequency-fill" style="width: ${percentage}%"></div>
+                        </div>
+                    </div>
+                    <div class="frequency-count">${count}</div>
+                `;
+                frequencyList.appendChild(item);
+            });
+            
+            topObjectsList.innerHTML = '';
+            sorted.slice(0, 10).forEach(([className, count], idx) => {
+                const medals = ['🥇', '🥈', '🥉'];
+                const medal = idx < 3 ? medals[idx] : `${idx + 1}.`;
+                
+                const item = document.createElement('div');
+                item.className = 'feed-item';
+                item.innerHTML = `
+                    <div class="feed-info">
+                        <div class="feed-object">${medal} ${getObjectIcon(className)} ${className}</div>
+                        <div class="feed-time">Terdeteksi ${count}x</div>
+                    </div>
+                    <div class="feed-badge">${Math.round((count/totalCounts.total)*100)}%</div>
+                `;
+                topObjectsList.appendChild(item);
+            });
+        }
+        
+        // HISTORY
+        function updateHistory() {
+            if (dataCollected.length === 0) {
+                historyGrid.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">📁</div>
+                        <div class="empty-text">Belum ada data tersimpan</div>
+                    </div>
+                `;
+                exportBtn.disabled = true;
+                saveToDriveBtn.disabled = !currentUser;
+                return;
+            }
+            
+            historyGrid.innerHTML = '';
+            dataCollected.forEach(record => {
+                const card = document.createElement('div');
+                card.className = 'history-card';
+                card.innerHTML = `
+                    <button class="delete-card" onclick="deletePhoto(${record.id})">✕</button>
+                    <img src="${record.imageData}" alt="${record.location}" class="history-image">
+                    <div class="history-content">
+                        <div class="history-title">📍 ${record.location}</div>
+                        <div class="history-meta">
+                            🕐 ${record.timestamp}<br>
+                            🚗 ${record.counters.car} | 🏍️ ${record.counters.motorcycle} | 👤 ${record.counters.person}<br>
+                            📊 Total: ${record.counters.total}
+                        </div>
+                        <div class="history-detected">🤖 ${record.detected}</div>
+                    </div>
+                `;
+                historyGrid.appendChild(card);
+            });
+            
+            document.getElementById('photoCountHistory').textContent = dataCollected.length;
+            document.getElementById('photoCountDash').textContent = dataCollected.length;
+            exportBtn.disabled = false;
+            saveToDriveBtn.disabled = !currentUser;
+        }
+        
+        window.deletePhoto = async function(id) {
+            if (!confirm('Hapus foto ini?')) return;
+            
+            const record = dataCollected.find(r => r.id === id);
+            
+            // Delete from Firestore if exists
+            if (record && record.firestoreId) {
+                await deleteFromFirestore(record.firestoreId);
+            }
+            
+            dataCollected = dataCollected.filter(r => r.id !== id);
+            updateHistory();
+            saveToLocalStorage();
+            
+            showAlert('🗑️ Foto dihapus', 'info');
+        }
+        
+        // EXPORT
+        exportBtn.addEventListener('click', async () => {
+            if (dataCollected.length === 0) return;
+            
+            showAlert('📦 Membuat file export...', 'info');
+            exportBtn.disabled = true;
+            
+            const zip = new JSZip();
+            const imgFolder = zip.folder('images');
+            
+            let csv = 'id,filename,timestamp,location,detected_objects,car,motorcycle,person,bicycle,bus,truck,total\n';
+            dataCollected.forEach(record => {
+                csv += `${record.id},"${record.filename}","${record.timestamp}","${record.location}","${record.detected}",${record.counters.car},${record.counters.motorcycle},${record.counters.person},${record.counters.bicycle},${record.counters.bus},${record.counters.truck},${record.counters.total}\n`;
+                
+                const base64Data = record.imageData.split(',')[1];
+                imgFolder.file(record.filename, base64Data, {base64: true});
+            });
+            
+            zip.file('data_tracking.csv', csv);
+            
+            let analyticsCsv = 'object_class,frequency,percentage\n';
+            const sorted = Object.entries(objectFrequency).sort((a, b) => b[1] - a[1]);
+            sorted.forEach(([className, count]) => {
+                const percentage = (count / totalCounts.total * 100).toFixed(2);
+                analyticsCsv += `"${className}",${count},${percentage}%\n`;
+            });
+            zip.file('analytics_frequency.csv', analyticsCsv);
+            
+            const summary = `
+ZX LIVE DETECTION PRO - LAPORAN
+========================================
+Timestamp: ${new Date().toLocaleString('id-ID')}
+Lokasi: ${locationInput.value || 'Tidak disebutkan'}
+Durasi: ${timerDisplay.textContent}
+
+STATISTIK OBJEK:
+- Mobil: ${totalCounts.car}
+- Motor: ${totalCounts.motorcycle}
+- Orang: ${totalCounts.person}
+- Sepeda: ${totalCounts.bicycle}
+- Bus: ${totalCounts.bus}
+- Truk: ${totalCounts.truck}
+- TOTAL: ${totalCounts.total}
+
+FOTO: ${dataCollected.length} file
+
+TOP 5 OBJEK:
+${sorted.slice(0, 5).map((e, i) => `${i+1}. ${e[0]}: ${e[1]}x (${(e[1]/totalCounts.total*100).toFixed(1)}%)`).join('\n')}
+
+Metode: IoU Tracking (threshold: ${iouThreshold})
+© 2026 ZX Technology
+            `.trim();
+            
+            zip.file('ringkasan.txt', summary);
+            
+            const blob = await zip.generateAsync({type: 'blob'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `zx_detection_${Date.now()}.zip`;
+            a.click();
+            
+            showAlert('✅ Export berhasil!', 'success');
+            exportBtn.disabled = false;
+        });
+        
+        // GOOGLE DRIVE API
+        let driveAccessToken = null;
+        
+        async function initDriveAPI() {
+            if (!currentUser) return false;
+            
+            try {
+                // Get access token from Firebase Auth
+                const user = window.firebaseAuth.currentUser;
+                const token = await user.getIdToken();
+                
+                // For Drive API, we need OAuth access token from the sign-in flow
+                // This is stored when user signs in with Drive scope
+                const credential = GoogleAuthProvider.credentialFromResult(window.lastSignInResult);
+                if (credential && credential.accessToken) {
+                    driveAccessToken = credential.accessToken;
+                    return true;
+                }
+                
+                return false;
+            } catch (error) {
+                console.error('Drive API init error:', error);
+                return false;
+            }
+        }
+        
+        async function uploadToDrive(filename, imageData, metadata) {
+            if (!driveAccessToken) {
+                showAlert('⚠️ Login ulang untuk akses Drive', 'info');
+                return null;
+            }
+            
+            try {
+                // Convert base64 to blob
+                const base64Data = imageData.split(',')[1];
+                const binaryData = atob(base64Data);
+                const arrayBuffer = new ArrayBuffer(binaryData.length);
+                const view = new Uint8Array(arrayBuffer);
+                for (let i = 0; i < binaryData.length; i++) {
+                    view[i] = binaryData.charCodeAt(i);
+                }
+                const blob = new Blob([arrayBuffer], { type: 'image/jpeg' });
+                
+                // Create multipart form data
+                const boundary = '-------314159265358979323846';
+                const delimiter = "\r\n--" + boundary + "\r\n";
+                const closeDelimiter = "\r\n--" + boundary + "--";
+                
+                const fileMetadata = {
+                    name: filename,
+                    mimeType: 'image/jpeg',
+                    description: `ZX Detection - ${metadata.location} - ${metadata.timestamp}`
+                };
+                
+                const multipartRequestBody =
+                    delimiter +
+                    'Content-Type: application/json; charset=UTF-8\r\n\r\n' +
+                    JSON.stringify(fileMetadata) +
+                    delimiter +
+                    'Content-Type: image/jpeg\r\n\r\n' +
+                    binaryData +
+                    closeDelimiter;
+                
+                const response = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': 'Bearer ' + driveAccessToken,
+                        'Content-Type': 'multipart/related; boundary=' + boundary
+                    },
+                    body: multipartRequestBody
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Drive upload failed: ' + response.statusText);
+                }
+                
+                const result = await response.json();
+                return result.id;
+            } catch (error) {
+                console.error('Drive upload error:', error);
+                throw error;
+            }
+        }
+        
+        // SAVE TO DRIVE (Real Implementation)
+        saveToDriveBtn.addEventListener('click', async () => {
+            if (!currentUser) {
+                showAlert('⚠️ Login dulu untuk simpan ke Drive', 'info');
+                return;
+            }
+            
+            if (dataCollected.length === 0) {
+                showAlert('⚠️ Tidak ada data untuk disimpan', 'info');
+                return;
+            }
+            
+            saveToDriveBtn.disabled = true;
+            saveToDriveBtn.innerHTML = '<span class="loading"></span> Uploading...';
+            
+            try {
+                // Check if we have Drive access
+                const hasDriveAccess = await initDriveAPI();
+                
+                if (!hasDriveAccess) {
+                    // Need to re-authenticate with Drive scope
+                    showAlert('🔄 Login ulang untuk akses Google Drive...', 'info');
+                    
+                    const { signInWithPopup } = window.firebaseModules;
+                    const result = await signInWithPopup(window.firebaseAuth, window.firebaseProvider);
+                    
+                    // Store result for Drive token access
+                    window.lastSignInResult = result;
+                    
+                    const credential = GoogleAuthProvider.credentialFromResult(result);
+                    if (credential && credential.accessToken) {
+                        driveAccessToken = credential.accessToken;
+                    } else {
+                        throw new Error('Tidak dapat mengakses Drive. Coba lagi.');
+                    }
+                }
+                
+                let uploadedCount = 0;
+                
+                for (const record of dataCollected) {
+                    try {
+                        const driveFileId = await uploadToDrive(
+                            record.filename,
+                            record.imageData,
+                            {
+                                location: record.location,
+                                timestamp: record.timestamp,
+                                detected: record.detected
+                            }
+                        );
+                        
+                        if (driveFileId) {
+                            uploadedCount++;
+                            record.driveFileId = driveFileId;
+                        }
+                    } catch (err) {
+                        console.error('Failed to upload:', record.filename, err);
+                    }
+                }
+                
+                saveToLocalStorage();
+                
+                showAlert(`✅ ${uploadedCount}/${dataCollected.length} foto disimpan ke Google Drive`, 'success');
+            } catch (error) {
+                console.error('Drive save error:', error);
+                showAlert('❌ Gagal simpan ke Drive: ' + error.message, 'info');
+            } finally {
+                saveToDriveBtn.disabled = false;
+                saveToDriveBtn.innerHTML = '☁️ Simpan ke Drive';
+            }
+        });
+        
+        // RESET
+        resetAllBtn.addEventListener('click', () => {
+            if (!confirm('Hapus semua data? Tidak bisa dibatalkan!')) return;
+            
+            dataCollected = [];
+            totalCounts = { car: 0, motorcycle: 0, person: 0, bicycle: 0, bus: 0, truck: 0, total: 0 };
+            trackedObjects.clear();
+            objectFrequency = {};
+            
+            updateCounters();
+            
+            liveFeed.innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-icon">📡</div>
+                    <div class="empty-text">Menunggu deteksi aktif...</div>
+                </div>
+            `;
+            
+            resetTimer();
+            updateHistory();
+            updateAnalytics();
+            saveToLocalStorage();
+            
+            showAlert('🔄 Semua data dihapus', 'info');
+        });
+        
+        // FIRESTORE FUNCTIONS
+        async function saveToFirestore(record) {
+            if (!currentUser) return;
+            
+            try {
+                const { collection, addDoc } = window.firebaseModules;
+                const docRef = await addDoc(collection(window.firebaseDb, 'detections'), {
+                    userId: currentUser.uid,
+                    userEmail: currentUser.email,
+                    filename: record.filename,
+                    timestamp: record.timestamp,
+                    location: record.location,
+                    detected: record.detected,
+                    counters: record.counters,
+                    duration: record.duration,
+                    frequency: record.frequency,
+                    imageData: record.imageData,
+                    createdAt: new Date().toISOString()
+                });
+                
+                // Update record dengan Firestore ID
+                record.firestoreId = docRef.id;
+                
+                console.log('Saved to Firestore:', docRef.id);
+            } catch (error) {
+                console.error('Firestore save error:', error);
+                showAlert('⚠️ Gagal sync ke cloud: ' + error.message, 'info');
+            }
+        }
+        
+        async function loadUserDataFromFirestore() {
+            if (!currentUser) return;
+            
+            try {
+                const { collection, query, where, orderBy, getDocs } = window.firebaseModules;
+                const q = query(
+                    collection(window.firebaseDb, 'detections'),
+                    where('userId', '==', currentUser.uid),
+                    orderBy('createdAt', 'desc')
+                );
+                
+                const querySnapshot = await getDocs(q);
+                const cloudData = [];
+                
+                querySnapshot.forEach((doc) => {
+                    const data = doc.data();
+                    cloudData.push({
+                        id: cloudData.length,
+                        firestoreId: doc.id,
+                        filename: data.filename,
+                        timestamp: data.timestamp,
+                        location: data.location,
+                        detected: data.detected,
+                        imageData: data.imageData,
+                        counters: data.counters,
+                        duration: data.duration,
+                        frequency: data.frequency
+                    });
+                });
+                
+                if (cloudData.length > 0) {
+                    // Merge dengan data lokal
+                    dataCollected = cloudData;
+                    
+                    // Recalculate totals from cloud data
+                    totalCounts = { car: 0, motorcycle: 0, person: 0, bicycle: 0, bus: 0, truck: 0, total: 0 };
+                    objectFrequency = {};
+                    
+                    dataCollected.forEach(record => {
+                        totalCounts.car += record.counters.car || 0;
+                        totalCounts.motorcycle += record.counters.motorcycle || 0;
+                        totalCounts.person += record.counters.person || 0;
+                        totalCounts.bicycle += record.counters.bicycle || 0;
+                        totalCounts.bus += record.counters.bus || 0;
+                        totalCounts.truck += record.counters.truck || 0;
+                        totalCounts.total += record.counters.total || 0;
+                        
+                        if (record.frequency) {
+                            for (let [key, val] of Object.entries(record.frequency)) {
+                                objectFrequency[key] = (objectFrequency[key] || 0) + val;
+                            }
+                        }
+                    });
+                    
+                    updateCounters();
+                    updateHistory();
+                    updateAnalytics();
+                    
+                    showAlert(`☁️ Loaded ${cloudData.length} records from cloud`, 'success');
+                }
+            } catch (error) {
+                console.error('Firestore load error:', error);
+                showAlert('⚠️ Gagal load dari cloud, pakai data lokal', 'info');
+                loadFromLocalStorage();
+            }
+        }
+        
+        async function deleteFromFirestore(firestoreId) {
+            if (!currentUser || !firestoreId) return;
+            
+            try {
+                const { doc, deleteDoc } = window.firebaseModules;
+                await deleteDoc(doc(window.firebaseDb, 'detections', firestoreId));
+                console.log('Deleted from Firestore:', firestoreId);
+            } catch (error) {
+                console.error('Firestore delete error:', error);
+            }
+        }
+        
+        // LOCAL STORAGE
+        function saveToLocalStorage() {
+            localStorage.setItem('zx_detection_data', JSON.stringify({
+                dataCollected,
+                totalCounts,
+                objectFrequency
+            }));
+        }
+        
+        function loadFromLocalStorage() {
+            const saved = localStorage.getItem('zx_detection_data');
+            if (saved) {
+                const data = JSON.parse(saved);
+                dataCollected = data.dataCollected || [];
+                totalCounts = data.totalCounts || { car: 0, motorcycle: 0, person: 0, bicycle: 0, bus: 0, truck: 0, total: 0 };
+                objectFrequency = data.objectFrequency || {};
+                
+                updateCounters();
+                
+                if (dataCollected.length > 0) {
+                    updateHistory();
+                }
+                
+                if (Object.keys(objectFrequency).length > 0) {
+                    updateAnalytics();
+                }
+            }
+        }
+        
+        window.addEventListener('load', loadFromLocalStorage);
+        setInterval(saveToLocalStorage, 5000);
+        
+        // PWA SERVICE WORKER REGISTRATION
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/service-worker.js')
+                    .then((registration) => {
+                        console.log('ServiceWorker registered:', registration.scope);
+                        
+                        // Check for updates periodically
+                        setInterval(() => {
+                            registration.update();
+                        }, 60000); // Check every minute
+                    })
+                    .catch((error) => {
+                        console.log('ServiceWorker registration failed:', error);
+                    });
+            });
+            
+            // Handle service worker updates
+            let refreshing = false;
+            navigator.serviceWorker.addEventListener('controllerchange', () => {
+                if (refreshing) return;
+                refreshing = true;
+                window.location.reload();
+            });
+        }
+        
+        // PWA INSTALL PROMPT
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            
+            // Show install banner/button (optional)
+            showAlert('📱 App bisa di-install! Klik menu browser > Install App', 'info');
+        });
+        
+        window.addEventListener('appinstalled', () => {
+            console.log('PWA installed');
+            deferredPrompt = null;
+            showAlert('✅ Aplikasi berhasil di-install!', 'success');
+        });
+    </script>
+</body>
+</html>
